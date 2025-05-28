@@ -1,0 +1,35 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+ll gcd(ll a,ll b) {
+  if(a==0) return b;
+  if(b==0) return a;
+  if(a==b) return a;
+  if(a>=b) return gcd(a-b,b);
+  else return gcd(a,b-a);
+}
+
+
+
+ll lcm_method1(ll a,ll b) {    //using simple process
+  ll ma=max(a,b);
+  while(1){
+    if(ma%a==0 && ma%b==0){
+      return ma;
+    }
+    ma++;
+  }
+}
+
+ll lcm_method2(ll a,ll b){    //using gcd
+  return ((a*b)/gcd(a,b));
+}
+
+int32_t main(){
+  ll a,b;
+  cin>>a>>b;
+  cout<<lcm_method2(a,b);
+  cout<<lcm_method1(a,b);
+}
