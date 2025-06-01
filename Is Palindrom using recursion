@@ -1,0 +1,16 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+bool ispalindrom(string s,ll i,ll j){    //using simple process
+  if(j>i){return true;} 
+  if(s[i]!=s[j]){return false;}
+else{return ispalindrome(s,i+1,j-1);}
+}
+
+int32_t main(){
+  string s;
+  cin>>s;
+  cout<<ispalindrome(s,0,s.length()-1)
+}
