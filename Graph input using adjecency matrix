@@ -1,0 +1,23 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+int main(){
+    ll n,m;
+    cin>>n>>m;
+    vector<vector<ll>>graph(n,vector<ll>(n,0));
+    for(ll i=0;i<m;i++){
+        ll v1,v2,w;
+        cin>>v1>>v2>>w;
+        graph[v1-1][v2-1]=w;
+        graph[v2-1][v1-1]=w;
+    }
+    for(ll i=0;i<n;i++){
+        for(ll j=0;j<n;j++){
+            cout<<graph[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+
+}
