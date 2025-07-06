@@ -1,0 +1,32 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+const ll N=1e5+10;
+bool vis[N];
+vector<pair<ll,ll>>graph[N];
+
+void dfs(ll v){
+    //take action on the vertex after entering the vertex
+  vis[v]=1;
+  cout<<v<<endl;
+  for(auto child: graph[v]){
+    //take action on the child before entering the child
+    if(vis[child.first]){continue;}
+    else{dfs(child.first);}
+    //take action on the child after exiting the child
+  }
+    //take action on the vertex before exiting the vertex
+}
+
+int main(){
+    ll n,m;
+    cin>>n>>m;
+    for(ll i=0;i<m;i++){
+        ll v1,v2,w;
+        cin>>v1>>v2>>w;
+        graph[v1].push_back({v2,w});
+        graph[v2].push_back({v1,w});
+    }
+    dfs(1);
+}
