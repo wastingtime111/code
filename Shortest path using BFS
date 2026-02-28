@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 1e5 + 5;
+vector<int> adj[N];
+vector<int> dist(N, -1);
+vector<int> parent(N, -1);
+
+void bfs(int start) {
+    queue<int> q;
+    q.push(start);
+    dist[start] = 0;
+
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+
+        for (int child : adj[node]) {
+            if (dist[child] == -1) {   // not visited
+                dist[child] = dist[node] + 1;
+                parent[child] = node;
+                q.push(child);
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);  // undirected
+    }
+
+    int start = 1;
+    bfs(start);
+
+    int target;
+    cin >> target;
+
+    if (dist[target] == -1) {
+        cout << "No path\n";
+        return 0;
+    }
+
+    cout << "Shortest Distance: " << dist[target] << endl;
+
+    // Reconstruct path
+    vector<int> path;
+    for (int v = target; v != -1; v = parent[v]) {
+        path.push_back(v);
+    }
+    reverse(path.begin(), path.end());
+
+    cout << "Path: ";
+    for (int node : path)
+        cout << node << " ";
+}
