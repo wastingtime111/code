@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 1e5 + 5;
+vector<int> adj[N];
+vector<int> visited(N, 0);
+
+void bfs(int start) {
+    queue<int> q;
+
+    visited[start] = 1;
+    q.push(start);
+
+    while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+
+        cout << node << " ";
+
+        for (int child : adj[node]) {
+            if (!visited[child]) {
+                visited[child] = 1;
+                q.push(child);
+            }
+        }
+    }
+}
