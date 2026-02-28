@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+const int N = 200005;
+vector<int> v[N];
+int color[N]={0};
+bool isBipartite = true;
+
+void dfs(int u,int j) {
+    if(color[u]==j||isBipartite == false){return;}
+    color[u]=j;
+    for (int x : v[u]) {
+        if (color[x]==j){
+            isBipartite = false;
+            return;
+        } 
+        else{
+            dfs(x,0-j);
+        }
+    }
+    return;
+}
+
+int main() {
+
+    int n, m;
+    cin >> n >> m;
+    vector<pair<int,int>>v1;
+    for (int i = 0; i < m; i++) {
+        int u1, u2;
+        cin >> u1 >> u2;
+        v1.push_back({u1,u2});
+        v[u1].push_back(u2);
+        v[u2].push_back(u1);
+    }
+    for (int i = 1; i <=n; i++) {
+        if(color[i]==0){
+            dfs(i,1);
+        }
+    }
+}
