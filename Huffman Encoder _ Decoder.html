@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Huffman Encoder / Decoder</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1d1d1b;--mute:#6b6b66;--line:#e2e0d8;--acc:#0f766e;--acc2:#b45309;--code:#f1efe8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#201f1d;--ink:#eeece6;--mute:#9a9890;--line:#34322e;--acc:#2dd4bf;--acc2:#fbbf24;--code:#2a2926}}
+:root[data-theme="dark"]{--bg:#161615;--card:#201f1d;--ink:#eeece6;--mute:#9a9890;--line:#34322e;--acc:#2dd4bf;--acc2:#fbbf24;--code:#2a2926}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px}
+p.sub{color:var(--mute);margin:0 0 20px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:0 0 10px}
+textarea{width:100%;min-height:72px;resize:vertical;background:var(--code);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:15px ui-monospace,Menlo,Consolas,monospace}
+.out{background:var(--code);border-radius:8px;padding:10px;min-height:44px;font:15px ui-monospace,Menlo,Consolas,monospace;word-break:break-all;margin-top:10px}
+.out.err{color:#dc2626}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;margin-top:10px;margin-right:6px}
+button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:500}
+td.c,td.b{font-family:ui-monospace,Menlo,Consolas,monospace}
+td.b{color:var(--acc)}
+.stat{color:var(--mute);font-size:.9rem;margin-top:8px}
+</style>
+</head>
+<body>
+<main>
+<h1>Huffman Encoder / Decoder</h1>
+<p class="sub">The source text builds the code table. Then encode any text, or paste a bit signal to decode it.</p>
+
+<section>
+<h2>1 · Source text (builds the codes)</h2>
+<textarea id="src" spellcheck="false">AAAABBBCCD</textarea>
+<div class="tw"><table><thead><tr><th>Char</th><th>Count</th><th>Code</th></tr></thead><tbody id="tbl"></tbody></table></div>
+</section>
+
+<section>
+<h2>2 · Encode</h2>
+<textarea id="enc" spellcheck="false" placeholder="Type text to encode (uses only characters from the source text)">AAAABBBCCD</textarea>
+<button id="bEnc">Encode</button><button class="alt" id="bSend">Send result to decoder ↓</button>
+<div class="out" id="encOut"></div>
+<div class="stat" id="encStat"></div>
+</section>
+
+<section>
+<h2>3 · Decode</h2>
+<textarea id="dec" spellcheck="false" placeholder="Paste a signal of 0s and 1s"></textarea>
+<button id="bDec">Decode</button>
+<div class="out" id="decOut"></div>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let T = null;
+
+function build(text){
+  const mp = new Map();
+  for (const c of text) mp.set(c, (mp.get(c)||0)+1);
+  const chars = [...mp.keys()].sort();
+  const ch = [], freq = [], kids = [];
+  for (const c of chars){ ch.push(c); freq.push(mp.get(c)); kids.push([-1,-1]); }
+  const alive = new Array(ch.length).fill(true);
+  let count = ch.length;
+  while (count > 1){
+    let a=-1,b=-1;
+    for (let i=0;i<ch.length;i++) if (alive[i] && (a<0 || freq[i]<freq[a])) a=i;
+    for (let i=0;i<ch.length;i++) if (alive[i] && i!==a && (b<0 || freq[i]<freq[b])) b=i;
+    ch.push(null); freq.push(freq[a]+freq[b]); kids.push([a,b]); alive.push(true);
+    alive[a]=alive[b]=false; count--;
+  }
+  const root = ch.length-1, codes = new Map();
+  if (root >= 0){
+    if (kids[root][0] === -1) codes.set(ch[root], "0");
+    else {
+      const st=[[root,""]];
+      while (st.length){
+        const [n,s]=st.pop();
+        if (kids[n][0]===-1){ codes.set(ch[n],s); continue; }
+        st.push([kids[n][0],s+"0"],[kids[n][1],s+"1"]);
+      }
+    }
+  }
+  return {ch,kids,root,codes,mp,chars,single:ch.length===1};
+}
+
+function show(s){ return s===" " ? "␣" : s==="\n" ? "\\n" : s; }
+
+function refresh(){
+  T = build($("src").value);
+  const rows = T.chars.map(c => `<tr><td class="c">${esc(show(c))}</td><td>${T.mp.get(c)}</td><td class="b">${T.codes.get(c)}</td></tr>`);
+  $("tbl").innerHTML = rows.join("") || `<tr><td colspan="3">Enter some source text.</td></tr>`;
+  encode(); 
+}
+function esc(s){ return s.replace(/[&<>]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])); }
+
+function encode(){
+  const out=$("encOut"), t=$("enc").value; out.classList.remove("err"); $("encStat").textContent="";
+  if (!T.chars.length){ out.textContent=""; return; }
+  let bits="";
+  for (const c of t){
+    if (!T.codes.has(c)){ out.classList.add("err"); out.textContent=`Character "${show(c)}" is not in the source text, so it has no code.`; return; }
+    bits += T.codes.get(c);
+  }
+  out.textContent = bits;
+  if (t.length){
+    const raw = t.length*8;
+    $("encStat").textContent = `${bits.length} bits vs ${raw} bits as 8-bit ASCII (${Math.round(100*(1-bits.length/raw))}% smaller)`;
+  }
+}
+
+function decode(){
+  const out=$("decOut"); out.classList.remove("err");
+  const bits=$("dec").value.replace(/\s+/g,"");
+  if (!T.chars.length){ out.classList.add("err"); out.textContent="Add source text first."; return; }
+  if (/[^01]/.test(bits)){ out.classList.add("err"); out.textContent="The signal may only contain 0 and 1."; return; }
+  let res="", cur=T.root;
+  if (T.single){
+    for (const b of bits){ if (b!=="0"){ out.classList.add("err"); out.textContent="Invalid bit for a single-symbol code."; return; } res+=T.ch[T.root]; }
+    out.textContent=res; return;
+  }
+  for (const b of bits){
+    cur = T.kids[cur][b==="0"?0:1];
+    if (T.kids[cur][0]===-1){ res+=T.ch[cur]; cur=T.root; }
+  }
+  out.textContent = res;
+  if (cur!==T.root){ out.classList.add("err"); out.textContent = res + "  ⚠ signal ended in the middle of a code"; }
+}
+
+$("src").addEventListener("input", refresh);
+$("enc").addEventListener("input", encode);
+$("bEnc").onclick = encode;
+$("bDec").onclick = decode;
+$("bSend").onclick = () => { $("dec").value = $("encOut").classList.contains("err") ? "" : $("encOut").textContent; decode(); };
+refresh();
+</script>
+</body>
+</html>
