@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Huffman Coding Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8eee9;--card:#f6f9f6;--ink:#1a2a2e;--mut:#5b6c6f;--line:#c5d1cb;--b0:#2b5f8f;--b1:#b8700a;--acc:#0f766e;--node:#dbe6e0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121b1d;--card:#1a2629;--ink:#e6efeb;--mut:#93a5a6;--line:#2f4044;--b0:#6fb0ea;--b1:#f0b04e;--acc:#4fd1c0;--node:#243538}}
+:root[data-theme="dark"]{--bg:#121b1d;--card:#1a2629;--ink:#e6efeb;--mut:#93a5a6;--line:#2f4044;--b0:#6fb0ea;--b1:#f0b04e;--acc:#4fd1c0;--node:#243538}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Space Grotesk',system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:2rem;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+h2{font-size:1rem;margin:0 0 10px;font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input{flex:1;min-width:200px;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+input:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button{font:inherit;font-weight:600;padding:10px 16px;border:0;border-radius:8px;background:var(--acc);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat b{display:block;font-size:1.6rem;letter-spacing:-.02em}
+.stat span{color:var(--mut);font-size:.85rem}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.9rem}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-family:'Space Grotesk',sans-serif;color:var(--mut);font-weight:600}
+.bits{font-family:'JetBrains Mono',ui-monospace,monospace;word-break:break-all;line-height:1.7}
+.bits .z{color:var(--b0)}.bits .o{color:var(--b1)}
+.bits span.hl,.hlrow{background:color-mix(in srgb,var(--acc) 25%,transparent);border-radius:3px}
+.out{font-family:'JetBrains Mono',ui-monospace,monospace;word-break:break-all;white-space:pre-wrap}
+.ok{color:var(--acc);font-weight:600}
+.bad{color:#c0392b;font-weight:600}
+svg text{font-family:'JetBrains Mono',monospace}
+.hint{color:var(--mut);font-size:.85rem;margin:8px 0 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Huffman Coding</h1>
+<p class="sub">Type a string to build its Huffman tree, see each character's code, then encode and decode it.</p>
+
+<div class="card">
+  <div class="row">
+    <input id="inp" aria-label="Text to encode" value="huffman coding example" maxlength="300">
+    <button id="go">Encode</button>
+    <button class="ghost" id="shuf">Try an example</button>
+  </div>
+</div>
+
+<div id="res"></div>
+</main>
+<script>
+const examples=["abracadabra","huffman coding example","she sells sea shells","mississippi river","aaaaabbbcc"];
+let ei=0;
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const vis=c=>c===' '?'[space]':c;
+
+function build(text){
+  // Same algorithm as the C++ code: sorted chars, repeatedly merge the two smallest.
+  const mp=new Map();
+  for(const c of text)mp.set(c,(mp.get(c)||0)+1);
+  const ch=[],freq=[],child=[];
+  [...mp.keys()].sort().forEach(c=>{ch.push(c);freq.push(mp.get(c));child.push([-1,-1])});
+  let n=ch.length;
+  const live=freq.slice();
+  const steps=[];
+  while(n>1){
+    let a=-1,b=-1;
+    for(let i=0;i<live.length;i++)if(live[i]!==-1&&(a===-1||live[i]<live[a]))a=i;
+    for(let i=0;i<live.length;i++)if(live[i]!==-1&&i!==a&&(b===-1||live[i]<live[b]))b=i;
+    ch.push(null);freq.push(live[a]+live[b]);live.push(live[a]+live[b]);child.push([a,b]);
+    steps.push([a,b,freq.length-1]);
+    live[a]=-1;live[b]=-1;n--;
+  }
+  const root=ch.length-1;
+  const code={};
+  const st=[[root,""]];
+  while(st.length){
+    const [node,s]=st.pop();
+    if(child[node][0]===-1){code[ch[node]]=s||"0";continue}
+    st.push([child[node][0],s+"0"]);
+    st.push([child[node][1],s+"1"]);
+  }
+  return {ch,freq,child,root,code,steps};
+}
+
+function layout(t){
+  const pos={};let leaf=0;
+  (function walk(n,d){
+    const [l,r]=t.child[n];
+    if(l===-1){pos[n]={x:leaf++,d};return}
+    walk(l,d+1);walk(r,d+1);
+    pos[n]={x:(pos[l].x+pos[r].x)/2,d};
+  })(t.root,0);
+  return {pos,leaves:leaf};
+}
+
+function treeSVG(t){
+  const {pos,leaves}=layout(t);
+  const dx=64,dy=76,pad=36;
+  let maxD=0;Object.values(pos).forEach(p=>maxD=Math.max(maxD,p.d));
+  const W=Math.max(leaves*dx+pad,200),H=(maxD+1)*dy+pad;
+  const X=n=>pad/2+pos[n].x*dx+dx/2-dx/2+ (dx/2);
+  const Y=n=>pad/2+pos[n].d*dy+22;
+  let e="",nd="";
+  for(const k in pos){
+    const n=+k,[l,r]=t.child[n];
+    if(l===-1)continue;
+    [[l,"0"],[r,"1"]].forEach(([c,b])=>{
+      const mx=(X(n)+X(c))/2,my=(Y(n)+Y(c))/2;
+      e+=`<line x1="${X(n)}" y1="${Y(n)}" x2="${X(c)}" y2="${Y(c)}" stroke="var(--line)" stroke-width="2"/>
+      <text x="${mx+(b==="0"?-9:9)}" y="${my}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--${b==="0"?"b0":"b1"})">${b}</text>`;
+    });
+  }
+  for(const k in pos){
+    const n=+k,leafNode=t.child[n][0]===-1;
+    if(leafNode){
+      nd+=`<g><rect x="${X(n)-24}" y="${Y(n)-18}" width="48" height="40" rx="8" fill="var(--node)" stroke="var(--acc)" stroke-width="1.5"/>
+      <text x="${X(n)}" y="${Y(n)-2}" text-anchor="middle" font-size="${t.ch[n]===' '?9:14}" font-weight="600" fill="var(--ink)">${esc(vis(t.ch[n]))}</text>
+      <text x="${X(n)}" y="${Y(n)+14}" text-anchor="middle" font-size="11" fill="var(--mut)">${t.freq[n]}</text></g>`;
+    }else{
+      nd+=`<g><circle cx="${X(n)}" cy="${Y(n)}" r="17" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+      <text x="${X(n)}" y="${Y(n)+4}" text-anchor="middle" font-size="12" fill="var(--ink)">${t.freq[n]}</text></g>`;
+    }
+  }
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Huffman tree">${e}${nd}</svg>`;
+}
+
+function colorBits(s){return [...s].map(b=>`<span class="${b==="0"?"z":"o"}">${b}</span>`).join("")}
+
+function run(){
+  const text=$("inp").value;
+  const out=$("res");
+  if(!text){out.innerHTML='<div class="card"><p>Enter some text above, then press Encode.</p></div>';return}
+  const t=build(text);
+  const encoded=[...text].map(c=>t.code[c]).join("");
+  // decode (same walk as the C++ code)
+  let cur=t.root,dec="";
+  if(t.child[t.root][0]===-1){dec=text}
+  else for(const bit of encoded){
+    cur=bit==="0"?t.child[cur][0]:t.child[cur][1];
+    if(t.child[cur][0]===-1){dec+=t.ch[cur];cur=t.root}
+  }
+  const orig=text.length*8,enc=encoded.length;
+  const saved=Math.max(0,(1-enc/orig)*100);
+  const rows=Object.keys(t.code).map(c=>({c,f:[...text].filter(x=>x===c).length,code:t.code[c]}))
+    .sort((a,b)=>a.code.length-b.code.length||b.f-a.f||(a.c<b.c?-1:1));
+  const tbl=rows.map(r=>`<tr data-c="${esc(r.c)}"><td>${esc(vis(r.c))}</td><td>${r.f}</td><td>${colorBits(r.code)}</td><td>${r.code.length}</td></tr>`).join("");
+  const note=Object.keys(t.code).length===1?'<p class="hint">Only one distinct character, so it is given the code 0 (a one-node tree has no edges).</p>':'';
+  out.innerHTML=`
+  <div class="card"><div class="stats">
+    <div class="stat"><b>${orig}</b><span>bits as 8-bit characters</span></div>
+    <div class="stat"><b>${enc}</b><span>bits with Huffman</span></div>
+    <div class="stat"><b>${saved.toFixed(1)}%</b><span>space saved</span></div>
+    <div class="stat"><b>${Object.keys(t.code).length}</b><span>distinct characters</span></div>
+  </div></div>
+  <div class="card"><h2>Huffman tree</h2>
+    <div class="scroll">${treeSVG(t)}</div>
+    <p class="hint">Left branch is 0, right branch is 1. Leaves show the character and its count; inner nodes show the combined count.</p></div>
+  <div class="card"><h2>Huffman codes</h2><div class="scroll"><table>
+    <thead><tr><th>Char</th><th>Count</th><th>Code</th><th>Length</th></tr></thead><tbody>${tbl}</tbody></table></div>${note}</div>
+  <div class="card"><h2>Original</h2><div class="out">${esc(text)}</div></div>
+  <div class="card"><h2>Encoded</h2><div class="bits" id="enc">${[...text].map((c,i)=>`<span data-c="${esc(c)}">${colorBits(t.code[c])}</span>`).join("")}</div>
+    <p class="hint">Hover a row in the table, or a character group here, to highlight matching codes.</p></div>
+  <div class="card"><h2>Decoded</h2><div class="out">${esc(dec)}</div>
+    <p>${dec===text?'<span class="ok">Matches the original.</span>':'<span class="bad">Does not match the original.</span>'}</p></div>`;
+  const hl=(c,on)=>{
+    out.querySelectorAll("#enc span[data-c]").forEach(s=>s.classList.toggle("hl",on&&s.dataset.c===c));
+    out.querySelectorAll("tbody tr").forEach(r=>r.classList.toggle("hlrow",on&&r.dataset.c===c));
+  };
+  out.querySelectorAll("tbody tr,#enc span[data-c]").forEach(el=>{
+    el.addEventListener("mouseenter",()=>hl(el.dataset.c,true));
+    el.addEventListener("mouseleave",()=>hl(el.dataset.c,false));
+  });
+}
+
+$("go").addEventListener("click",run);
+$("inp").addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+$("shuf").addEventListener("click",()=>{$("inp").value=examples[ei++%examples.length];run()});
+run();
+</script>
+</body>
+</html>
