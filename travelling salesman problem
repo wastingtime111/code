@@ -1,0 +1,71 @@
+In a 2d plane i have some points (x,y). i have to start from (0,0) ans visit all the points in the 2d plane in the minimum distance possible print the distance
+
+
+
+
+
+
+
+
+
+
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll=long long;
+
+const double inf=1e18;
+
+
+int main() {
+    ll n,r;
+    cin>>n>>r;
+    vector <double>vx(n);
+    vector <double>vy(n);
+    for(ll i=0;i<n;i++){
+        cin>>vx[i];
+        cin>>vy[i];
+    }
+    
+    vector<vector<double>> dis(n,vector<double>(n));
+	for(ll i=0;i<n;i++){
+		for(ll j=0;j<n;j++){
+			double dx=vx[i]-vx[j];
+			double dy=vy[i]-vy[j];
+			dis[i][j]=sqrt(dx*dx+dy*dy);
+		}
+	}
+    
+    
+    ll mx=1LL<<n;
+    vector<vector<double>> dp(mx,vector<double>(n,inf));
+   for(ll i=0;i<n;i++){
+	   dp[1LL<<i][i]=sqrt(vx[i]*vx[i] + vy[i]*vy[i]);
+   }
+    
+    for(ll ms=1;ms<mx;ms++){
+		for(ll u=0;u<n;u++){
+			if (!(ms & (1LL << u))) continue;
+			if(dp[ms][u]==inf) continue;
+			for(ll v=0;v<n;v++){
+				if(ms&(1LL<<v)) continue;
+				
+				ll nms= ms | (1<<v);
+				
+				dp[nms][v]=min(dp[nms][v],dp[ms][u]+dis[u][v]);
+			}
+		}
+		
+	}
+	
+	double ans=inf;
+	
+	for(ll i=0;i<n;i++){
+		double back = sqrt(vx[i]*vx[i] + vy[i]*vy[i]);
+        ans = min(ans, dp[mx-1][i] + back);
+	}
+	cout << fixed << setprecision(6) << ans << '\n';
+    
+}
