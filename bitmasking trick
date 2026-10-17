@@ -1,0 +1,251 @@
+
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using ull = unsigned long long;
+
+// XOR of numbers from 0 to n
+ll xor0n(ll n) {
+    if (n % 4 == 0) return n;
+    if (n % 4 == 1) return 1;
+    if (n % 4 == 2) return n + 1;
+    return 0;
+}
+
+// XOR of range [l, r], assuming l >= 0
+ll rangeXor(ll l, ll r) {
+    return xor0n(r) ^ (l == 0 ? 0 : xor0n(l - 1));
+}
+
+// Check power of two
+bool isPowerOfTwo(ll n) {
+    return n > 0 && (n & (n - 1)) == 0;
+}
+
+int main() {
+    ll mask = 13; // Binary: 1101
+    ll a = 12, b = 10;
+    int i = 2;
+    int n = 4;
+    int k = 2;
+
+    // 1. Check if bit i is ON
+    bool on = mask & (1LL << i);
+
+    // 2. Turn ON bit i
+    mask |= (1LL << i);
+
+    // 3. Turn OFF bit i
+    mask &= ~(1LL << i);
+
+    // 4. Toggle bit i
+    mask ^= (1LL << i);
+
+    // 5. Check power of two
+    bool power = isPowerOfTwo(mask);
+
+    // 6. Remove lowest set bit
+    mask &= (mask - 1);
+
+    // 7. Get lowest set bit value
+    ll lowbit = mask & -mask;
+
+    // 8. Count set bits
+    int cnt = __builtin_popcountll(mask);
+
+    // 9. Check odd or even
+    bool odd = mask & 1LL;
+
+    // 10. Multiply/divide by powers of two
+    ll mul = mask << k;
+    ll div = mask >> k; // For nonnegative mask
+
+    // 11. Check common set bits
+    bool common = (a & b) != 0;
+
+    // 12. Check if all bits of b exist in a
+    bool contains = (a & b) == b;
+
+    // 13. Check zero mask
+    bool zero = (mask == 0);
+
+    // 14. Create mask with lowest n bits ON
+    ll full = (1LL << n) - 1;
+
+    // 15. Complement within n bits
+    ll complement = (~mask) & full;
+
+    // 16. Iterate through nonempty submasks
+    for (ll sub = mask; sub; sub = (sub - 1) & mask) {
+        // Process sub
+    }
+
+    // 17. Exactly one set bit
+    bool oneBit = isPowerOfTwo(mask);
+
+    // 18. XOR swap (prefer std::swap in practice)
+    ll x = 5, y = 8;
+    x ^= y;
+    y ^= x;
+    x ^= y;
+
+    // 19. Number of bits needed (mask must be positive)
+    int bits = mask ? 64 - __builtin_clzll((ull)mask) : 0;
+
+    // 20. Opposite signs (typical two's-complement platforms)
+    bool oppositeSigns = ((a ^ b) < 0);
+
+    // 21. Represent set {0, 2, 3}
+    ll setMask = (1LL << 0) | (1LL << 2) | (1LL << 3);
+
+    // 22. Add element x to set
+    int elem = 1;
+    setMask |= (1LL << elem);
+
+    // 23. Remove element x from set
+    setMask &= ~(1LL << elem);
+
+    // 24. Check whether element x exists
+    bool exists = setMask & (1LL << elem);
+
+    // 25. Enumerate every mask (n must be less than 63)
+    for (ll m = 0; m < (1LL << n); m++) {
+        // Process subset m
+    }
+
+    // 26. Position of highest set bit (mask > 0)
+    int highPos = mask ? 63 - __builtin_clzll((ull)mask) : -1;
+
+    // 27. Position of lowest set bit (mask > 0)
+    int lowPos = mask ? __builtin_ctzll((ull)mask) : -1;
+
+    // 28. Check if bit i is OFF
+    bool off = !(mask & (1LL << i));
+
+    // 29. Lowest k bits ON (k < 63)
+    ll lowestK = (1LL << k) - 1;
+
+    // 30. Clear lowest k bits
+    mask &= ~((1LL << k) - 1);
+
+    // 31. Keep only lowest k bits
+    mask &= (1LL << k) - 1;
+
+    // 32. Turn ON bits 0 through i
+    mask |= (1LL << (i + 1)) - 1;
+
+    // 33. Toggle bits specified by another mask
+    mask ^= b;
+
+    // 34. XOR from 0 to n
+    ll prefixXor = xor0n(n);
+
+    // 35. XOR from l to r
+    ll xr = rangeXor(2, 7);
+
+    // 36. Check if sub is a submask of mask
+    ll sub = 5;
+    bool isSubmask = (sub & mask) == sub;
+
+    // 37. Remove bit i, assuming it is ON
+    if (mask & (1LL << i))
+        mask ^= (1LL << i);
+
+    // 38. Add element only if absent
+    if (!(mask & (1LL << i)))
+        mask |= (1LL << i);
+
+    // 39. Enumerate all submasks including zero
+    for (ll s = mask; ; s = (s - 1) & mask) {
+        // Process s
+        if (s == 0) break;
+    }
+
+    // 40. Enumerate nonempty submasks
+    for (ll s = mask; s; s = (s - 1) & mask) {
+        // Process s
+    }
+
+    // 41. Enumerate all supermasks within n bits
+    full = (1LL << n) - 1;
+    for (ll sup = mask & full; ; sup = (sup + 1) | (mask & full)) {
+        // Process sup
+        if (sup == full) break;
+    }
+
+    // 42. Enumerate masks with exactly k set bits
+    for (ll m = 0; m < (1LL << n); m++) {
+        if (__builtin_popcountll((ull)m) == k) {
+            // Process m
+        }
+    }
+
+    // 43. Check if masks are disjoint
+    bool disjoint = (a & b) == 0;
+
+    // 44. Union of two sets
+    ll unionMask = a | b;
+
+    // 45. Intersection of two sets
+    ll intersectionMask = a & b;
+
+    // 46. Total number of subsets of n elements
+    ll totalSubsets = 1LL << n;
+
+    // 47. Print selected elements
+    for (int j = 0; j < n; j++) {
+        if (mask & (1LL << j)) {
+            // j is selected
+        }
+    }
+
+    // 48. Size of a subset
+    int subsetSize = __builtin_popcountll((ull)mask);
+
+    // 49. Gosper's hack: next mask with same set-bit count
+    // Requires a valid next combination within n bits.
+    ll g = 7; // 00111, three set bits
+    ll c = g & -g;
+    ll r = g + c;
+    ll next = (((r ^ g) >> 2) / c) | r;
+
+    // 50. DP transition: add an unused element
+    int v = 1;
+    if (!(mask & (1LL << v))) {
+        ll nmask = mask | (1LL << v);
+        // dp[nmask] = ...
+    }
+
+    // 51. Iterate through set bits only
+    ull temp = (ull)mask;
+    while (temp) {
+        int bit = __builtin_ctzll(temp);
+        // Process bit
+        temp &= temp - 1;
+    }
+
+    // 52. Iterate through unset elements
+    for (int j = 0; j < n; j++) {
+        if (!(mask & (1LL << j))) {
+            // Process unset element j
+        }
+    }
+
+    // 53. Min-cost DP transition (example)
+    // vector<ll> dp(1LL << n, LLONG_MAX);
+    // dp[0] = 0;
+    // if (dp[mask] != LLONG_MAX) {
+    //     ll nmask = mask | (1LL << v);
+    //     dp[nmask] = min(dp[nmask], dp[mask] + cost);
+    // }
+
+    // 54. Number of selected elements / DP layer
+    int used = __builtin_popcountll((ull)mask);
+
+    // 55. Check if all n elements are selected
+    full = (1LL << n) - 1;
+    bool allSelected = (mask == full);
+
+    return 0;
+}
