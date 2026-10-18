@@ -1,0 +1,177 @@
+Graph:
+
+    Dfs:0(V+E)
+        uses:
+            1.cycle detection
+            2.Finding connected component
+            3.Topological sort
+            4.Maze generating
+            5.check bipartite
+            6.find strongly connected component
+            7.Find the lowest common ancestor (LCA) of two vertices.
+        code:
+            #include <bits/stdc++.h>
+            using namespace std;
+
+            int main() {
+                int n, m;
+                cin >> n >> m;
+
+                vector<vector<int>> adj(n + 1);
+
+                for (int i = 0; i < m; i++) {
+                    int u, v;
+                    cin >> u >> v;
+                    adj[u].push_back(v);
+                    adj[v].push_back(u); // Undirected graph
+                }
+
+                vector<bool> vis(n + 1, false);
+                stack<int> st;
+
+                int src = 1;
+                st.push(src);
+
+                while (!st.empty()) {
+                    int u = st.top();
+                    st.pop();
+
+                    if (vis[u]) continue;
+                    vis[u] = true;
+
+                    cout << u << " ";
+
+                    for (int v : adj[u]) {
+                        if (!vis[v]) {
+                            st.push(v);
+                        }
+                    }
+                }
+
+                return 0;
+            }
+        
+        Connected component:
+            int dfs(int node) {
+                int visCount = 1;
+                visited[node] = true;
+                for (auto neighbour: graph[node]) {
+                    if (!visited[neighbour]) {
+                        visCount += dfs(neighbour);
+                    }
+                }
+                return visCount;
+            }
+        Diameter of a tree:
+            #include <bits/stdc++.h>
+            using namespace std;
+
+            using ll = long long;
+
+            pair<int, int> dfs(int src, vector<vector<int>>& adj) {
+                int n = adj.size();
+                vector<int> dist(n, -1);
+                stack<int> st;
+
+                st.push(src);
+                dist[src] = 0;
+
+                int farthest = src;
+
+                while (!st.empty()) {
+                    int u = st.top();
+                    st.pop();
+
+                    if (dist[u] > dist[farthest])
+                        farthest = u;
+
+                    for (int v : adj[u]) {
+                        if (dist[v] == -1) {
+                            dist[v] = dist[u] + 1;
+                            st.push(v);
+                        }
+                    }
+                }
+
+                return {farthest, dist[farthest]};
+            }
+
+            int main() {
+                int n;
+                cin >> n;
+
+                vector<vector<int>> adj(n + 1);
+
+                for (int i = 0; i < n - 1; i++) {
+                    int u, v;
+                    cin >> u >> v;
+
+                    adj[u].push_back(v);
+                    adj[v].push_back(u);
+                }
+
+                int A = dfs(1, adj).first;
+                int diameter = dfs(A, adj).second;
+
+                cout << diameter << '\n';
+
+                return 0;
+            }
+    
+
+
+    BFS:
+        simple bfs:
+            void bfs(int src, vector<vector<int>>& adj) {
+                queue<pair<int, int>> q;
+                q.push({src, 0}); // node, parent
+
+                while (!q.empty()) {
+                    auto [u, p] = q.front();
+                    q.pop();
+
+                    cout << u << " ";
+
+                    for (int v : adj[u]) {
+                        if (v == p) continue;
+                        q.push({v, u});
+                    }
+                }
+            }
+        
+        bfs on grid:
+            void bfs(int sx, int sy, vector<string>& grid,
+            vector<vector<int>>& dist) {
+
+                int n = grid.size();
+                int m = grid[0].size();
+
+                queue<pair<int, int>> q;
+                q.push({sx, sy});
+                dist[sx][sy] = 0;
+
+                int dx[] = {-1, 1, 0, 0};
+                int dy[] = {0, 0, -1, 1};
+
+                while (!q.empty()) {
+                    auto [x, y] = q.front();
+                    q.pop();
+
+                    for (int i = 0; i < 4; i++) {
+                        int nx = x + dx[i];
+                        int ny = y + dy[i];
+
+                        if (nx < 0 || nx >= n ||
+                            ny < 0 || ny >= m)
+                            continue;
+
+                        if (grid[nx][ny] == '#' || dist[nx][ny] != -1)
+                            continue;
+
+                        dist[nx][ny] = dist[x][y] + 1;
+                        q.push({nx, ny});
+                    }
+                }
+            }
+
+                    
