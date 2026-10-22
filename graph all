@@ -121,6 +121,7 @@ Graph:
 
 
     BFS:
+        
         simple bfs:
             void bfs(int src, vector<vector<int>>& adj) {
                 queue<pair<int, int>> q;
@@ -173,5 +174,322 @@ Graph:
                     }
                 }
             }
+        0 1 BFS:
+            this algorithm is used when all the edged are valued in either in 0 or 1.and i have to iterate the minimum vlue of edge from one node to another or we can say that i have to calculate the lowest path.
+            sol: if edge in 2 node is 0 then i have to consider that child as same level as the parent for this i will push that node in the front and i9f the edgr is not 0 then i will push that node in the back
 
-                    
+
+            int bfs01(int src, int dest, vector<vector<pair<int, int>>>& adj) {
+                deque<pair<int, int>> dq;
+                vector<int> dist(adj.size(), INT_MAX);
+
+                dist[src] = 0;
+                dq.push_front({src, 0});
+
+                while (!dq.empty()) {
+                    auto [u, d] = dq.front();
+                    dq.pop_front();
+
+                    if (d != dist[u]) continue;
+
+                    if (u == dest) return d;
+
+                    for (auto [v, w] : adj[u]) {
+                        if (dist[u] + w < dist[v]) {
+                            dist[v] = dist[u] + w;
+
+                            if (w == 0)
+                                dq.push_front({v, dist[v]});
+                            else
+                                dq.push_back({v, dist[v]});
+                        }
+                    }
+                }
+
+                return -1;
+            }
+        
+        Multisouce BFS:
+            in this type of question i have 2 or more nodes and i have to find that which node has shortest distance from a specific node.
+
+            sol: we have to consider all the nodes as same level and the start bfs after bfs we will find the shortest distance for that specific node
+            code: same as shortest path algorithm bt we just push all the starting node in the queue then start bfs in this manner i am considering all the starting node as the first node
+    
+    Shortest-path:
+        Dijkstra's Algorithm: O((V+E)log V)
+            finds the shortest distance from one source node to every other node in a weighted graph.It works only when all edge weights are non-negative
+            Process:
+                1. Set the source distance to 0 and all other distances to INF.
+                2. Use a min-priority queue to select the node with the smallest distance.
+                3. Visit its neighbors and update their distances if a shorter path is found (relaxation).
+                4. Repeat until the priority queue is empty.
+            Code:
+                #include <bits/stdc++.h>
+                using namespace std;
+
+                using ll = long long;
+                const ll INF = 4e18;
+
+                vector<ll> dijkstra(int n,
+                    vector<vector<pair<int,ll>>>& adj, int src) {
+
+                    vector<ll> dist(n + 1, INF);
+
+                    priority_queue<
+                        pair<ll,int>,
+                        vector<pair<ll,int>>,
+                        greater<pair<ll,int>>
+                    > pq;
+
+                    dist[src] = 0;
+                    pq.push({0, src});
+
+                    while (!pq.empty()) {
+                        auto [d, u] = pq.top();
+                        pq.pop();
+
+                        if (d != dist[u]) continue;
+
+                        for (auto [v, w] : adj[u]) {
+                            if (dist[v] > d + w) {
+                                dist[v] = d + w;
+                                pq.push({dist[v], v});
+                            }
+                        }
+                    }
+
+                    return dist;
+                }
+
+                int main() {
+                    int n, m;
+                    cin >> n >> m;
+
+                    vector<vector<pair<int,ll>>> adj(n + 1);
+
+                    for (int i = 0; i < m; i++) {
+                        int u, v;
+                        ll w;
+                        cin >> u >> v >> w;
+
+                        adj[u].push_back({v, w});
+                        adj[v].push_back({u, w}); // Undirected graph
+                    }
+
+                    int src;
+                    cin >> src;
+
+                    vector<ll> dist = dijkstra(n, adj, src);
+
+                    for (int i = 1; i <= n; i++) {
+                        if (dist[i] == INF) cout << -1 << ' ';
+                        else cout << dist[i] << ' ';
+                    }
+                }
+        Floyd–Warshall:  0(n^3)
+            Algorithm finds the shortest distance between every pair of nodes in a weighted graph.
+            Unlike Dijkstra, which typically starts from one source, Floyd–Warshall calculates distances for all pairs of nodes.
+            It supports negative edge weights but does not work correctly if the graph contains a negative-weight cycle.
+            Process:
+                1. Create a distance matrix dist[n][n].
+                2. Set dist[i][i] = 0, direct edge distances to their weights, and missing edges to INF.
+                3. Consider every node k as an intermediate node between i and j.
+                4. Update the distance using:
+                
+                    dist[i][j]=min(dist[i][j],dist[i][k]+dist[k][j])
+                
+                5. After all iterations, dist[i][j] contains the shortest distance from i to j.
+            Code:
+                #include <bits/stdc++.h>
+                using namespace std;
+
+                using ll = long long;
+                const ll INF = 4e18;
+
+                int main() {
+                    int n, m;
+                    cin >> n >> m;
+
+                    vector<vector<ll>> dist(n + 1,
+                                            vector<ll>(n + 1, INF));
+
+                    for (int i = 1; i <= n; i++)
+                        dist[i][i] = 0;
+
+                    for (int i = 0; i < m; i++) {
+                        int u, v;
+                        ll w;
+                        cin >> u >> v >> w;
+
+                        dist[u][v] = min(dist[u][v], w);
+                        // For an undirected graph:
+                        // dist[v][u] = min(dist[v][u], w);
+                    }
+
+                    for (int k = 1; k <= n; k++) {
+                        for (int i = 1; i <= n; i++) {
+                            for (int j = 1; j <= n; j++) {
+                                if (dist[i][k] == INF ||
+                                    dist[k][j] == INF)
+                                    continue;
+
+                                dist[i][j] = min(
+                                    dist[i][j],
+                                    dist[i][k] + dist[k][j]
+                                );
+                            }
+                        }
+                    }
+
+                    // Print all-pairs shortest distances
+                    for (int i = 1; i <= n; i++) {
+                        for (int j = 1; j <= n; j++) {
+                            if (dist[i][j] == INF)
+                                cout << "INF ";
+                            else
+                                cout << dist[i][j] << ' ';
+                        }
+                        cout << '\n';
+                    }
+
+                    // Negative cycle check
+                    for (int i = 1; i <= n; i++) {
+                        if (dist[i][i] < 0) {
+                            cout << "Negative cycle exists\n";
+                            break;
+                        }
+                    }
+                }
+        Bellman–Ford: O(VE)
+            finds the shortest distance from one source node to every other node in a weighted graph.
+            Its main advantage over Dijkstra is that it supports negative edge weights and can detect negative-weight cycles reachable from the source.It has a greater time complexity thrn the previous algorithm.
+            Process:
+                1. Set the source distance to 0 and all other distances to INF.
+                2. Relax every edge: if dist[u] + w < dist[v], update dist[v].
+                3. Repeat this process n - 1 times, where n is the number of vertices.
+                4. Run one additional iteration. If any distance can still be reduced, a reachable negative cycle exists.
+
+            Code:
+                #include <bits/stdc++.h>
+                using namespace std;
+
+                using ll = long long;
+                const ll INF = 4e18;
+
+                struct Edge {
+                    int u, v;
+                    ll w;
+                };
+
+                int main() {
+                    int n, m;
+                    cin >> n >> m;
+
+                    vector<Edge> edges(m);
+
+                    for (int i = 0; i < m; i++) {
+                        cin >> edges[i].u >> edges[i].v >> edges[i].w;
+                    }
+
+                    int src;
+                    cin >> src;
+
+                    vector<ll> dist(n + 1, INF);
+                    dist[src] = 0;
+
+                    // Relax all edges n - 1 times
+                    for (int i = 1; i <= n - 1; i++) {
+                        bool changed = false;
+
+                        for (auto e : edges) {
+                            if (dist[e.u] == INF) continue;
+
+                            if (dist[e.u] + e.w < dist[e.v]) {
+                                dist[e.v] = dist[e.u] + e.w;
+                                changed = true;
+                            }
+                        }
+
+                        if (!changed) break;
+                    }
+
+                    // Check for a reachable negative cycle
+                    bool negCycle = false;
+
+                    for (auto e : edges) {
+                        if (dist[e.u] != INF &&
+                            dist[e.u] + e.w < dist[e.v]) {
+                            negCycle = true;
+                            break;
+                        }
+                    }
+
+                    if (negCycle) {
+                        cout << "Negative cycle exists\n";
+                    } else {
+                        for (int i = 1; i <= n; i++) {
+                            if (dist[i] == INF)
+                                cout << i << " -> INF\n";
+                            else
+                                cout << i << " -> " << dist[i] << '\n';
+                        }
+                    }
+                }
+        
+
+        In Short:
+            Unweighted graph (minimum number of edges)	BFS
+            Weighted graph, all weights non-negative	Dijkstra
+            Negative edge weights, single-source shortest path	Bellman–Ford
+            Shortest distances between all pairs, small \(N\)	Floyd–Warshall
+            Detect a negative cycle reachable from source	Bellman–Ford
+            Shortest path in a DAG (even with negative weights)	Topological Sort + DP
+            Edge weights only 0 or 1	0–1 BFS
+
+
+
+
+
+
+            
+
+
+
+            
+
+                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
