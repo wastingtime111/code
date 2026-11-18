@@ -1,231 +1,415 @@
-1.Making a tier of a strings and do 3 operations insert,search and startswith in the tier
-    #include <bits/stdc++.h>
-    using namespace std;
 
-    const int N = 1000005;
+#include <bits/stdc++.h>
+using namespace std;
 
-    int trie[N][26];
-    bool terminal[N];
-    int node = 0;
+using ull = uint32_t;
 
-    void insert(string s) {
-        int cur = 0;
 
-        for (char c : s) {
-            int x = c - 'a';
+// =====================================================
+// 1. STRING TRIE: INSERT, SEARCH, STARTS WITH
+// =====================================================
 
-            if (trie[cur][x] == 0) {
-                trie[cur][x] = ++node;
-            }
+const int N1 = 1000005;
 
-            cur = trie[cur][x];
+int trie1[N1][26];
+bool terminal1[N1];
+int node1 = 0;
+
+
+// INSERT
+void insertString(string s) {
+
+    int cur = 0;
+
+    for (char c : s) {
+
+        int x = c - 'a';
+
+        if (trie1[cur][x] == 0) {
+            trie1[cur][x] = ++node1;
         }
 
-        terminal[cur] = true;
+        cur = trie1[cur][x];
     }
 
-    bool search(string s) {
-        int cur = 0;
+    terminal1[cur] = true;
+}
 
-        for (char c : s) {
-            int x = c - 'a';
 
-            if (trie[cur][x] == 0) {
-                return false;
-            }
+// SEARCH
+bool searchString(string s) {
 
-            cur = trie[cur][x];
+    int cur = 0;
+
+    for (char c : s) {
+
+        int x = c - 'a';
+
+        if (trie1[cur][x] == 0) {
+            return false;
         }
 
-        return terminal[cur];
+        cur = trie1[cur][x];
     }
 
-    bool startsWith(string s) {
-        int cur = 0;
+    return terminal1[cur];
+}
 
-        for (char c : s) {
-            int x = c - 'a';
 
-            if (trie[cur][x] == 0) {
-                return false;
-            }
+// STARTS WITH
+bool startsWith(string s) {
 
-            cur = trie[cur][x];
+    int cur = 0;
+
+    for (char c : s) {
+
+        int x = c - 'a';
+
+        if (trie1[cur][x] == 0) {
+            return false;
         }
 
-        return true;
+        cur = trie1[cur][x];
     }
 
-    int main() {
-        insert("apple");
-        insert("app");
-
-        cout << search("apple") << '\n';    // 1
-        cout << search("appl") << '\n';     // 0
-        cout << startsWith("appl") << '\n'; // 1
-    }
+    return true;
+}
 
 
+// =====================================================
+// 2. STRING TRIE: COUNT WORDS AND PREFIXES
+// =====================================================
+
+const int N2 = 1000005;
+
+int trie2[N2][26];
+int pref[N2], endd[N2];
+int node2 = 0;
 
 
+// INSERT
+void insertCount(string s) {
 
+    int cur = 0;
 
-2. counting words and number of word starts with:
+    for (char c : s) {
 
-    #include <bits/stdc++.h>
-    using namespace std;
-    using ll =long long;
+        int x = c - 'a';
 
-    const int N = 1000005;
-
-    int tier[N][26];
-    int pref[N],endd[N];
-    int node=0;
-
-    void insert(string s){
-        int cur=0;
-        for (char c: s){
-            int x = c-'a';
-            if(trie[cu][x]==0){
-                trie[cu][x]=node+1;
-                node++;
-            }
-            cur=trie[cur][x];
-            pref[cur]++;
-        }
-        endd[cur]++;
-    }
-
-    int countwordsequlto(string s){
-        int cur=0;
-        for(char c: s){
-            int x=c-'a';
-            if(trie[cu][x]==0){
-                return 0;
-            }
-            else{
-                cur=trie[cur][x];
-            }
-        }
-        return endd[cur];
-    }
-
-    int countwordsstartswith(string s){
-        int cur=0;
-        for(char c: s){
-            int x=c-'a';
-            if(trie[cu][x]==0){
-                return false;
-            }
-            else{
-                cur=trie[cur][x];
-            }
-        }
-        return pref[cur];
-    }
-
-
-
-
-3. All distinct substring in a strings
-
-    int trie[N][26];
-    int node = 0;
-
-    void insert(string s) {
-        int cur = 0;
-
-        for (char c : s) {
-            int x = c - 'a';
-
-            if (trie[cur][x] == 0) {
-                trie[cur][x] = ++node;
-            }
-
-            cur = trie[cur][x];
-        }
-    }
-
-    int distinctSubstrings(string s) {
-        for (int i = 0; i < s.size(); i++) {
-            insert(s.substr(i));
+        if (trie2[cur][x] == 0) {
+            trie2[cur][x] = ++node2;
         }
 
-        return node;
-        // we will insert strings one by one by cutting the first elemwnt from the original string and at the end the number of node in trie is the number of distinct substring
+        cur = trie2[cur][x];
+
+        pref[cur]++;
     }
 
+    endd[cur]++;
+}
 
-4. trie in bits
 
-    const int N = 1000005;
-    int trie[N][2];
-    int node = 0;
+// COUNT WORDS EQUAL TO STRING
+int countWordsEqualTo(string s) {
 
-    void insert(int x) {
-        int cur = 0;
+    int cur = 0;
 
-        for (int i = 30; i >= 0; i--) {
+    for (char c : s) {
 
-            int bit = (x >> i) & 1;
+        int x = c - 'a';
 
-            if (trie[cur][bit] == 0) {
-                trie[cur][bit] = ++node;
-            }
-
-            cur = trie[cur][bit];
-        }
-    }
-
-    int getMaxXor(int x) {
-
-        int cur = 0;
-        int ans = 0;
-
-        for (int i = 30; i >= 0; i--) {
-
-            int bit = (x >> i) & 1;
-
-            int opposite = 1 - bit;
-
-            if (trie[cur][opposite] != 0) {
-
-                ans |= (1 << i);
-
-                cur = trie[cur][opposite];
-            }
-            else {
-
-                cur = trie[cur][bit];
-            }
-        }
-
-        return ans;
-    }
-
-        int main() {
-
-            int n;
-            cin >> n;
-
-            vector<int> a(n);
-
-            for (int i = 0; i < n; i++) {
-                cin >> a[i];
-            }
-
-            int ans = 0;
-
-            insert(a[0]);
-
-            for (int i = 1; i < n; i++) {
-
-                ans = max(ans, getMaxXor(a[i])); //compare then insert in this manner repeated comparison will not going to happend
-
-                insert(a[i]);
-            }
-
-            cout << ans << '\n';
-
+        if (trie2[cur][x] == 0) {
             return 0;
         }
+
+        cur = trie2[cur][x];
+    }
+
+    return endd[cur];
+}
+
+
+// COUNT WORDS STARTING WITH STRING
+int countWordsStartingWith(string s) {
+
+    int cur = 0;
+
+    for (char c : s) {
+
+        int x = c - 'a';
+
+        if (trie2[cur][x] == 0) {
+            return 0;
+        }
+
+        cur = trie2[cur][x];
+    }
+
+    return pref[cur];
+}
+
+
+// =====================================================
+// 3. TRIE: COUNT ALL DISTINCT SUBSTRINGS
+// =====================================================
+
+const int N3 = 1000005;
+
+int trie3[N3][26];
+int node3 = 0;
+
+
+// INSERT SUFFIX
+void insertSuffix(string &s, int start) {
+
+    int cur = 0;
+
+    for (int i = start; i < s.size(); i++) {
+
+        int x = s[i] - 'a';
+
+        if (trie3[cur][x] == 0) {
+            trie3[cur][x] = ++node3;
+        }
+
+        cur = trie3[cur][x];
+    }
+}
+
+
+// COUNT DISTINCT SUBSTRINGS
+int distinctSubstrings(string s) {
+
+    for (int i = 0; i < s.size(); i++) {
+        insertSuffix(s, i);
+    }
+
+    return node3;
+}
+
+
+// =====================================================
+// 4. BINARY TRIE: MAXIMUM XOR
+// =====================================================
+
+const int N4 = 3200005;
+
+int trie4[N4][2];
+int node4 = 0;
+
+
+// INSERT
+void insertBinary(ull x) {
+
+    int cur = 0;
+
+    for (int i = 31; i >= 0; i--) {
+
+        int bit = (x >> i) & 1u;
+
+        if (trie4[cur][bit] == 0) {
+            trie4[cur][bit] = ++node4;
+        }
+
+        cur = trie4[cur][bit];
+    }
+}
+
+
+// MAXIMUM XOR
+ull getMaxXor(ull x) {
+
+    int cur = 0;
+    ull ans = 0;
+
+    for (int i = 31; i >= 0; i--) {
+
+        int bit = (x >> i) & 1u;
+        int opposite = 1 - bit;
+
+        if (trie4[cur][opposite] != 0) {
+
+            ans |= (1u << i);
+
+            cur = trie4[cur][opposite];
+        }
+
+        else {
+
+            cur = trie4[cur][bit];
+        }
+    }
+
+    return ans;
+}
+
+
+// =====================================================
+// 5. BINARY TRIE: DUPLICATES, SEARCH AND DELETE
+// =====================================================
+
+const int N5 = 3200005;
+
+int trie5[N5][2];
+int cnt5[N5];
+
+int node5 = 0;
+
+
+// INSERT
+void insertWithCount(ull x) {
+
+    int cur = 0;
+
+    cnt5[cur]++;
+
+    for (int i = 31; i >= 0; i--) {
+
+        int bit = (x >> i) & 1u;
+
+        if (trie5[cur][bit] == 0) {
+            trie5[cur][bit] = ++node5;
+        }
+
+        cur = trie5[cur][bit];
+
+        cnt5[cur]++;
+    }
+}
+
+
+// SEARCH
+bool searchBinary(ull x) {
+
+    int cur = 0;
+
+    for (int i = 31; i >= 0; i--) {
+
+        int bit = (x >> i) & 1u;
+
+        if (trie5[cur][bit] == 0 ||
+            cnt5[trie5[cur][bit]] == 0) {
+
+            return false;
+        }
+
+        cur = trie5[cur][bit];
+    }
+
+    return cnt5[cur] > 0;
+}
+
+
+// DELETE
+bool eraseBinary(ull x) {
+
+    if (!searchBinary(x)) {
+        return false;
+    }
+
+    int cur = 0;
+
+    cnt5[cur]--;
+
+    for (int i = 31; i >= 0; i--) {
+
+        int bit = (x >> i) & 1u;
+
+        cur = trie5[cur][bit];
+
+        cnt5[cur]--;
+    }
+
+    return true;
+}
+
+
+// MAXIMUM XOR WITH ACTIVE ELEMENTS
+ull getMaxXorWithCount(ull x) {
+
+    if (cnt5[0] == 0) {
+        return 0;
+    }
+
+    int cur = 0;
+    ull ans = 0;
+
+    for (int i = 31; i >= 0; i--) {
+
+        int bit = (x >> i) & 1u;
+        int opposite = 1 - bit;
+
+        if (trie5[cur][opposite] != 0 &&
+            cnt5[trie5[cur][opposite]] > 0) {
+
+            ans |= (1u << i);
+
+            cur = trie5[cur][opposite];
+        }
+
+        else {
+
+            cur = trie5[cur][bit];
+        }
+    }
+
+    return ans;
+}
+
+
+// =====================================================
+// MAIN FUNCTION: TEST ANY TEMPLATE
+// =====================================================
+
+int main() {
+
+    // 1. STRING TRIE
+
+    insertString("apple");
+    insertString("app");
+
+    cout << searchString("apple") << '\n';
+    cout << startsWith("appl") << '\n';
+
+
+    // 2. COUNTING TRIE
+
+    insertCount("apple");
+    insertCount("app");
+    insertCount("apple");
+
+    cout << countWordsEqualTo("apple") << '\n';
+    cout << countWordsStartingWith("app") << '\n';
+
+
+    // 3. DISTINCT SUBSTRINGS
+
+    cout << distinctSubstrings("aba") << '\n';
+
+
+    // 4. MAXIMUM XOR
+
+    insertBinary(5);
+    insertBinary(7);
+
+    cout << getMaxXor(3) << '\n';
+
+
+    // 5. BINARY TRIE WITH DUPLICATES
+
+    insertWithCount(5);
+    insertWithCount(5);
+    insertWithCount(7);
+
+    cout << searchBinary(5) << '\n';
+
+    cout << getMaxXorWithCount(3) << '\n';
+
+    cout << eraseBinary(5) << '\n';
+    cout << eraseBinary(10) << '\n';
+
+    cout << searchBinary(5) << '\n';
+
+
+    return 0;
+}
