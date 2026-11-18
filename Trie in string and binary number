@@ -1,0 +1,231 @@
+1.Making a tier of a strings and do 3 operations insert,search and startswith in the tier
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    const int N = 1000005;
+
+    int trie[N][26];
+    bool terminal[N];
+    int node = 0;
+
+    void insert(string s) {
+        int cur = 0;
+
+        for (char c : s) {
+            int x = c - 'a';
+
+            if (trie[cur][x] == 0) {
+                trie[cur][x] = ++node;
+            }
+
+            cur = trie[cur][x];
+        }
+
+        terminal[cur] = true;
+    }
+
+    bool search(string s) {
+        int cur = 0;
+
+        for (char c : s) {
+            int x = c - 'a';
+
+            if (trie[cur][x] == 0) {
+                return false;
+            }
+
+            cur = trie[cur][x];
+        }
+
+        return terminal[cur];
+    }
+
+    bool startsWith(string s) {
+        int cur = 0;
+
+        for (char c : s) {
+            int x = c - 'a';
+
+            if (trie[cur][x] == 0) {
+                return false;
+            }
+
+            cur = trie[cur][x];
+        }
+
+        return true;
+    }
+
+    int main() {
+        insert("apple");
+        insert("app");
+
+        cout << search("apple") << '\n';    // 1
+        cout << search("appl") << '\n';     // 0
+        cout << startsWith("appl") << '\n'; // 1
+    }
+
+
+
+
+
+
+2. counting words and number of word starts with:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+    using ll =long long;
+
+    const int N = 1000005;
+
+    int tier[N][26];
+    int pref[N],endd[N];
+    int node=0;
+
+    void insert(string s){
+        int cur=0;
+        for (char c: s){
+            int x = c-'a';
+            if(trie[cu][x]==0){
+                trie[cu][x]=node+1;
+                node++;
+            }
+            cur=trie[cur][x];
+            pref[cur]++;
+        }
+        endd[cur]++;
+    }
+
+    int countwordsequlto(string s){
+        int cur=0;
+        for(char c: s){
+            int x=c-'a';
+            if(trie[cu][x]==0){
+                return 0;
+            }
+            else{
+                cur=trie[cur][x];
+            }
+        }
+        return endd[cur];
+    }
+
+    int countwordsstartswith(string s){
+        int cur=0;
+        for(char c: s){
+            int x=c-'a';
+            if(trie[cu][x]==0){
+                return false;
+            }
+            else{
+                cur=trie[cur][x];
+            }
+        }
+        return pref[cur];
+    }
+
+
+
+
+3. All distinct substring in a strings
+
+    int trie[N][26];
+    int node = 0;
+
+    void insert(string s) {
+        int cur = 0;
+
+        for (char c : s) {
+            int x = c - 'a';
+
+            if (trie[cur][x] == 0) {
+                trie[cur][x] = ++node;
+            }
+
+            cur = trie[cur][x];
+        }
+    }
+
+    int distinctSubstrings(string s) {
+        for (int i = 0; i < s.size(); i++) {
+            insert(s.substr(i));
+        }
+
+        return node;
+        // we will insert strings one by one by cutting the first elemwnt from the original string and at the end the number of node in trie is the number of distinct substring
+    }
+
+
+4. trie in bits
+
+    const int N = 1000005;
+    int trie[N][2];
+    int node = 0;
+
+    void insert(int x) {
+        int cur = 0;
+
+        for (int i = 30; i >= 0; i--) {
+
+            int bit = (x >> i) & 1;
+
+            if (trie[cur][bit] == 0) {
+                trie[cur][bit] = ++node;
+            }
+
+            cur = trie[cur][bit];
+        }
+    }
+
+    int getMaxXor(int x) {
+
+        int cur = 0;
+        int ans = 0;
+
+        for (int i = 30; i >= 0; i--) {
+
+            int bit = (x >> i) & 1;
+
+            int opposite = 1 - bit;
+
+            if (trie[cur][opposite] != 0) {
+
+                ans |= (1 << i);
+
+                cur = trie[cur][opposite];
+            }
+            else {
+
+                cur = trie[cur][bit];
+            }
+        }
+
+        return ans;
+    }
+
+        int main() {
+
+            int n;
+            cin >> n;
+
+            vector<int> a(n);
+
+            for (int i = 0; i < n; i++) {
+                cin >> a[i];
+            }
+
+            int ans = 0;
+
+            insert(a[0]);
+
+            for (int i = 1; i < n; i++) {
+
+                ans = max(ans, getMaxXor(a[i])); //compare then insert in this manner repeated comparison will not going to happend
+
+                insert(a[i]);
+            }
+
+            cout << ans << '\n';
+
+            return 0;
+        }
